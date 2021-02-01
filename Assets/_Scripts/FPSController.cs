@@ -14,6 +14,9 @@ public class FPSController : MonoBehaviour
     [SerializeField]
     private float _maxCamRotation = 60.0f;
 
+    [SerializeField]
+    private float _maxInteractionRange = 2.0f;
+
     private float _bodyRot = 0;
     private float _camRot = 0;
 
@@ -79,6 +82,13 @@ public class FPSController : MonoBehaviour
             {
                 Jump();
             }
+        }
+        #endregion
+
+        #region Check Interaction
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            TryInteraction();
         }
         #endregion
     }
@@ -149,4 +159,30 @@ public class FPSController : MonoBehaviour
         _rigidbody.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
     }
     #endregion
+
+    private void TryInteraction()
+    {
+        RaycastHit hit;
+
+        if (Physics.Raycast(_fpsCam.transform.position, _fpsCam.transform.forward, out hit, _maxInteractionRange))
+        {
+            Debug.Log(hit.collider.gameObject.name);
+            IInteractable interactable = hit.collider.gameObject.GetComponent<IInteractable>();
+
+            if (interactable != null)
+            {
+                interactable.Interact();
+                return;
+            }
+            else
+            {
+                interactable = hit.collider.GetComponentInParent<IInteractable>();
+                if (interactable != null)
+                {
+                    interactable.Interact();
+                    return;
+                }
+            }
+        }
+    }
 }
